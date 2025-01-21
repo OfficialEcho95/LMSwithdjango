@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ lesson.title }}</h1>
+    <p><strong>Content:</strong> {{ lesson.content }}</p>
+
+    <!-- External Video URLs -->
+    {% if lesson.video_url.all %}
+    <div>
+        <h3>External Video(s):</h3>
+        {% for video in lesson.video_url.all %}
+        <div style="margin-bottom: 15px;">
+            <a href="{{ video.url }}" target="_blank">Watch External Video</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Uploaded Media Files -->
+    {% if lesson.media_file.all %}
+    <div>
+        <h3>Uploaded Video(s):</h3>
+        {% for media in lesson.media_file.all %}
+        <div style="margin-bottom: 15px;">
+            <video width="320" height="256" controls>
+                <source src="{{ media.file.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Resource Downloads -->
+    {% if lesson.media_file.all %}
+    <div>
+        <h3>Resources:</h3>
+        {% for media in lesson.media_file.all %}
+        <p>
+            <a href="{{ media.file.url }}" download>Download Resource</a>
+        </p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <a href="{% url 'lesson_assignment' course.id lesson.id %}">Take Assignment</a>
+
+
+    <!-- Back Button -->
+    <a href="{% url 'learning' course.title user_email %}" class="btn btn-secondary">Back to Course</a>
+    {% if user_is_instructor %}
+    <a href="{% url 'update_lesson' lesson.id %}" class="btn btn-primary">Edit Lesson</a>
+    {% endif %}
+</div>
+{% endblock %}

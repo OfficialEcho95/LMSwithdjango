@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <!-- Display validation errors if any -->
+    {% if messages %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <h2 class="form-title">Add a New Course</h2>
+
+    <form method="post" enctype="multipart/form-data" class="course-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="title">Course Title:</label>
+            <input type="text" id="title" name="title" class="form-control" value="{{ course.title }}" required
+                placeholder="Enter course title">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Course Description:</label>
+            <textarea id="description" name="description" class="form-control" rows="5"
+                placeholder="Enter course description" required>{{ course.description }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="objectives">Course Objectives:</label>
+            <textarea id="objectives" name="objectives" class="form-control" rows="5"
+                placeholder="Enter course objectives">{{ course.objectives }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="instructors">Instructors:</label>
+            {% if instructors %}
+            <select id="instructors" name="instructors[]" class="form-control" multiple required>
+                {% for instructor in instructors %}
+                <option value="{{ instructor.id }}" {% if instructor.id in course_instructors %} selected {% endif %}>
+                    {{ instructor.username }}
+                </option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <p>No instructors available. Please add instructors before creating a course.</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="thumbnail">Course Thumbnail:</label>
+            <input type="file" id="thumbnail" name="thumbnail" class="form-control-file" accept="image/*">
+        </div>
+
+        <div class="form-group">
+            <label for="video_intro">Course Video Introduction:</label>
+            <input type="file" id="video_intro" name="video_intro" class="form-control-file" accept="video/*">
+        </div>
+
+        <div class="form-group">
+            <label for="is_free">Is the course free?</label>
+            <input type="checkbox" id="is_free" name="is_free" class="form-check-input" {% if course.is_free %} checked
+                {% endif %}>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Course Price:</label>
+            <input type="number" id="price" name="price" class="form-control" step="0.01" min="0"
+                value="{{ course.price }}" {% if course.is_free %} disabled {% endif %}>
+        </div>
+
+        <div class="form-group">
+            <label for="is_published">Is the course published?</label>
+            <input type="checkbox" id="is_published" name="is_published" class="form-check-input" {% if course.is_published %} checked {% endif %}>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Course</button>
+    </form>
+</div>
+
+{% endblock %}
+
+<!--  -->

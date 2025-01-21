@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ course.title }}</h1>
+    <p class="text-muted">{{ course.description }}</p>
+    <p class="text-muted">This course will be handled by the following: <br> <b>{{ instructors.username }}</b></p>
+
+    <!-- Progress Bar -->
+    {% if progress %}
+    <p class="text-muted">This is your progress on the course</p>
+    <div class="progress my-4" style="width: 50%;">
+        <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}"
+            aria-valuemin="0" aria-valuemax="100">
+            {{ progress }}%
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Lessons -->
+    <h3>Lessons</h3>
+    <ul class="list-group mb-4" style="cursor: pointer;">
+        {% for lesson in lessons %}
+        <a href="{% url 'get_lesson' course.id lesson.id %}" class="text-decoration-none text-black">
+            <li class="list-group-item mb-3 border rounded shadow-sm">
+                <div>
+                    <strong>{{ lesson.title }} Your score: {{ grade }}</strong><br>
+                    <p>{{ lesson.content|truncatewords:20 }}</p>
+                </div>
+
+                <!-- Display local videos -->
+                {% if lesson.media_file.all %}
+                <h5>Local Videos:</h5>
+                <div class="mb-3">
+                    {% for media in lesson.media_file.all %}
+                    <div class="mb-2">
+                        <video width="320" height="256" controls>
+                            <source src="{{ media.file.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No local videos available for this lesson.</p>
+                {% endif %}
+
+                <!-- Display external video links -->
+                {% if lesson.video_url.all %}
+                <h5>External Resources:</h5>
+                <div class="mb-3">
+                    {% for video in lesson.video_url.all %}
+                    <div class="mb-2">
+                        <a href="{{ video.url }}" target="_blank">{{ video.url }}</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No external resources available for this lesson.</p>
+                {% endif %}
+
+            </li>
+        </a>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
+<style>
+    .text-black {
+        color: black !important;
+    }
+
+    a.text-black {
+        color: black !important;
+        text-decoration: none;
+        /* Keeps the text clean without underlines */
+    }
+
+    a.text-black:hover {
+        color: black;
+        /* Ensures the color stays black even on hover */
+    }
+</style>

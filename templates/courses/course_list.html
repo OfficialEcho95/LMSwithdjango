@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Available Courses</h1>
+
+{% block course_list_content %}
+<ul
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; list-style: none; padding: 0; margin: 0;">
+    {% for course in courses %}
+    <li
+        style="background: #fdfdfd; border: 1px solid #ddd; border-radius: 10px; padding: 15px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); transition: transform 0.2s, box-shadow 0.2s;">
+        <h2 style="font-size: 1.5em; margin-bottom: 10px; color: #333;">{{ course.title }}</h2>
+        <img src="{{ MEDIA_URL }}{{ course.thumbnail }}" alt="Course Thumbnail"
+            style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;">
+        <p style="font-size: 1em; margin-bottom: 10px; color: #555;">{{ course.description }}</p>
+        <p style="font-size: 0.9em; margin-bottom: 15px; color: #777;"><strong>Instructors:</strong>
+            {% for instructor in course.instructor.all %}
+            {{ instructor.username }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        <a href="{% url 'course_detail' course.id %}"
+            style="display: inline-block; margin-bottom: 10px; padding: 10px 20px; background-color: #17a2b8; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            View Details
+        </a>
+
+        {% if course.can_delete %}
+        <form action="{% url 'delete_course' course.id %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit"
+                style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;"
+                onclick="return confirm('Are you sure you want to delete this course?');">
+                Delete Course
+            </button>
+        </form>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
+<!-- Button to add a course -->
+{% for instructor in course.instructor.all %}
+<a href="{% url 'add_course' %}"
+    style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    Add Course
+</a>
+{% endfor %}
+{% endblock %}
+
+{% endblock %}

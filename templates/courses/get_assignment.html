@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Assignments for {{ lesson.title }}</h1>
+
+{% if assignments %}
+<ul class="assignment-list">
+    {% for assignment in assignments %}
+    <li class="assignment-item">
+        <div class="assignment-header">
+            <h2 class="assignment-title">{{ assignment.title }}</h2>
+            <p class="assignment-description">{{ assignment.description }}</p>
+            <p class="assignment-due-date"><strong>Due Date:</strong> {{ assignment.due_date }}</p>
+        </div>
+
+        <div class="assignment-questions">
+            <h3 class="questions-title">Questions:</h3>
+            <form method="post" class="question-form">
+                {% csrf_token %}
+                <ol class="question-list">
+                    {% for question in assignment.questions.all %}
+                    <li class="question-item">
+                        <p class="question-text">{{ question.question_text }}</p>
+
+                        {% if is_instructor %}
+                        <p class="question-answer">
+                            <strong>Answer:</strong>
+                            {% if question.is_true %}
+                            True
+                            {% else %}
+                            False
+                            {% endif %}
+                        </p>
+                        {% else %}
+                        <label>
+                            <input type="radio" name="answer_{{ question.id }}" value="true"> True
+                        </label>
+                        <label>
+                            <input type="radio" name="answer_{{ question.id }}" value="false"> False
+                        </label>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+
+                {% if not is_instructor %}
+                <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                {% endif %}
+            </form>
+        </div>
+
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="no-assignments-message">No assignments available for this lesson.</p>
+{% endif %}
+{% endblock %}

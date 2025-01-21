@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Assignments for {{ lesson.title }}</h1>
+<h2>Course: {{ course.name }}</h2>
+
+{% if assignments %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Due Date</th>
+            <th>Max Grade</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for assignment in assignments %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ assignment.title }}</td>
+            <td>{{ assignment.description|truncatewords:20 }}</td>
+            <td>{{ assignment.due_date|date:"F d, Y h:i A" }}</td>
+            <td>{{ assignment.max_grade }}</td>
+            <td>
+                <a href="{% url 'edit_assignment' assignment.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'delete_assignment' assignment.id %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Assignments for this lesson are yet to be added.</p>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{% url 'add_assignment_to_lesson' course.id lesson.id %}" class="btn btn-primary">Add New Assignment</a>
+    <a href="{% url 'lesson_list' course.id %}" class="btn btn-secondary">Back to Lessons</a>
+</div>
+{% endblock %}

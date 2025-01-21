@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Courses</title>
+</head>
+
+<body>
+    <h1>Courses Purchased by Student</h1>
+    <ul>
+        {% for course in courses %}
+        <li>
+            <a href="{% url 'learning' course_title=course.title user_email=user.email %}">
+                {{ course.title }}
+            </a> - {{ course.description }}
+            <form action="{% url 'remove_course' user_id=user_id course_id=course.id %}" method="POST"
+                style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Remove</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>
+
+{% endblock %}

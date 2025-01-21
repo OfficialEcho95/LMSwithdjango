@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Add Assignment to {{ lesson.title }}</h1>
+
+<form method="post" class="assignment-form">
+    {% csrf_token %}
+    <!-- Assignment Title -->
+    <div class="form-group">
+        <label for="title" class="form-label">Assignment Title:</label>
+        <input type="text" id="title" name="title" class="form-control" required>
+    </div>
+
+    <!-- Assignment Description -->
+    <div class="form-group">
+        <label for="description" class="form-label">Description:</label>
+        <textarea id="description" name="description" class="form-control" required></textarea>
+    </div>
+
+    <!-- Assignment Due Date -->
+    <div class="form-group">
+        <label for="due_date" class="form-label">Due Date:</label>
+        <input type="datetime-local" id="due_date" name="due_date" class="form-control">
+    </div>
+
+    <!-- Questions Section -->
+    <div id="questions-container" class="form-group">
+        <!-- Initial Question -->
+        <div class="question-item">
+            <label for="question-1" class="form-label">Question:</label>
+            <textarea name="questions[]" id="question-1" class="form-control" placeholder="Enter question"
+                required></textarea>
+
+            <label for="answer-1" class="form-label">Answer:</label>
+            <select name="answers[]" id="answer-1" class="form-control" required>
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+
+            <!-- Hidden field to send correct answer -->
+            <input type="hidden" name="correct_answers[]" value="true">
+        </div>
+    </div>
+
+    <button type="button" id="add-question" class="btn btn-secondary">Add Question</button>
+
+    <!-- Submit Button -->
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Assignment</button>
+    </div>
+</form>
+
+<script>
+    // Add Question Button Logic
+    const addQuestionButton = document.getElementById("add-question");
+    const questionsContainer = document.getElementById("questions-container");
+
+    addQuestionButton.addEventListener("click", () => {
+        const questionIndex = questionsContainer.children.length + 1;
+        const questionDiv = document.createElement("div");
+        questionDiv.classList.add("question-item");
+        questionDiv.innerHTML = `
+            <label for="question-${questionIndex}" class="form-label">Question:</label>
+            <textarea name="questions[]" id="question-${questionIndex}" class="form-control" placeholder="Enter question" required></textarea>
+            
+            <label for="answer-${questionIndex}" class="form-label">Answer:</label>
+            <select name="answers[]" id="answer-${questionIndex}" class="form-control" required>
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+
+            <!-- Hidden field for correct answer -->
+            <input type="hidden" name="correct_answers[]" value="true">
+
+            <button type="button" class="btn btn-danger remove-question">Remove</button>
+        `;
+        questionsContainer.appendChild(questionDiv);
+
+        // Add event listener for remove question button
+        const removeQuestionButton = questionDiv.querySelector(".remove-question");
+        removeQuestionButton.addEventListener("click", () => {
+            questionsContainer.removeChild(questionDiv);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Update Course</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Title -->
+        <div class="mb-3">
+            <label for="title" class="form-label">Title:</label>
+            <input type="text" class="form-control" name="title" value="{{ course.title }}" required>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Description:</label>
+            <textarea class="form-control" name="description" rows="4" required>{{ course.description }}</textarea>
+        </div>
+
+        <!-- Objectives -->
+        <div class="mb-3">
+            <label for="objectives" class="form-label">Objectives:</label>
+            <textarea class="form-control" name="objectives" rows="3">{{ course.objectives }}</textarea>
+        </div>
+
+        <!-- Price and Is Free -->
+        <div class="mb-3">
+            <label for="price" class="form-label">Price:</label>
+            <input type="number" class="form-control" name="price" step="0.01" value="{{ course.price }}" {% if course.is_free %}disabled{% endif %}>
+
+            <div class="form-check mt-2">
+                <input type="checkbox" class="form-check-input" name="is_free" id="is_free" {% if course.is_free %}checked{% endif %}>
+                <label for="is_free" class="form-check-label">Is Free</label>
+            </div>
+        </div>
+
+        <!-- Thumbnail Upload -->
+        <div class="mb-3">
+            <label for="thumbnail" class="form-label">Thumbnail:</label>
+            <input type="file" class="form-control" name="thumbnail">
+            {% if course.thumbnail %}
+            <p>Current Thumbnail:</p>
+            <img src="{{ course.thumbnail.url }}" alt="Thumbnail" width="200">
+            {% endif %}
+        </div>
+
+        <!-- Video Intro Upload -->
+        <div class="mb-3">
+            <label for="video_intro" class="form-label">Video Introduction:</label>
+            <input type="file" class="form-control" name="video_intro">
+            {% if course.video_intro %}
+            <p>Current Video:</p>
+            <video width="320" height="240" controls>
+                <source src="{{ course.video_intro.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            {% endif %}
+        </div>
+
+        <!-- Instructors -->
+        <div class="mb-3">
+            <label for="instructors" class="form-label">Instructors:</label>
+            <select id="instructors" name="instructors[]" class="form-select" multiple required>
+                {% for instructor in instructors %}
+                <option value="{{ instructor.id }}" {% if instructor.id in selected_instructor_ids %}selected{% endif %}>
+                    {{ instructor.username }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Update Course</button>
+        <a href="{% url 'course_detail' course.id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

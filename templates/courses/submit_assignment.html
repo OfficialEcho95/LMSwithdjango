@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Submit Assignment: {{ assignment.title }}</h1>
+
+{% if assignment.questions.all %}
+<!-- Make sure the radio buttons are inside the same form as the submit button -->
+<form method="post" action="{% url 'submit_assignment' course.id lesson.id assignment.id %}"
+    class="submit-assignment-form">
+    {% csrf_token %}
+
+    <div class="assignment-questions">
+        <h3 class="questions-title">Questions:</h3>
+        <ol class="question-list">
+            {% for question in assignment.questions.all %}
+            <li class="question-item">
+                <p class="question-text">{{ question.question_text }}</p>
+
+                <!-- Render radio buttons for True/False answers -->
+                <div class="question-answer-options">
+                    <label>
+                        <input type="radio" name="answers_{{ question.id }}" value="true"> True
+                    </label>
+                    <label>
+                        <input type="radio" name="answers_{{ question.id }}" value="false"> False
+                    </label>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Assignment</button>
+</form>
+
+{% else %}
+<p>No questions available for this assignment.</p>
+{% endif %}
+
+{% endblock %}

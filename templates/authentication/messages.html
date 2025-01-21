@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% csrf_token %}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4"><i class="fa-solid fa-comments"></i> Messages</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Sidebar for Conversations -->
+            <div class="list-group">
+                <h5 class="list-group-item list-group-item-action active">Users</h5>
+                {% for user in users %}
+                <a href="#" class="list-group-item list-group-item-action"
+                    onclick="startChat('{{ user.id }}', '{{ user.username }}', event)">
+                    <i class="fa-solid fa-user"></i> {{ user.username }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-8">
+            <!-- Chat Section -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <strong id="chatWith">Click on any user to start a chat</strong>
+                </div>
+                <div class="card-body" id="chatBody" style="height: 300px; overflow-y: auto;">
+                    <!-- Messages will be shown here -->
+                    {% for message in received_messages %}
+                    <div class="d-flex mb-3">
+                        <div class="me-auto p-2 bg-light rounded">
+                            <strong>{{ message.sender.username }}:</strong>
+                            <p>{{ message.content }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No messages yet.</p>
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <form id="chatForm">
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" placeholder="Type your message..."
+                                disabled>
+                            <button class="btn btn-primary" type="button" id="sendMessageBtn" disabled><i
+                                    class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    let activeUserId = null;
+
+    
+    const sio = io("http://localhost:7000/messages/socket.io", { transports: ["websocket"] });
+
+    // Function to start a chat with a selected user
+    function startChat(userId, username, event) {
+        event.preventDefault(); // Prevent page refresh
+
+        activeUserId = userId; // Set active user ID for the session
+        document.getElementById('chatWith').innerText = 'Chat with ' + username;
+        document.getElementById('messageInput').disabled = false;
+        document.getElementById('sendMessageBtn').disabled = false;
+
+        // Fetch the chat messages for the selected user
+        fetch('/auth/courses/messages/fetch_messages/', {
+            method: 'POST',
+            body: JSON.stringify({ userId: activeUserId }),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken() // Include CSRF token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const chatBody = document.getElementById('chatBody');
+                chatBody.innerHTML = ''; // Clear chat body
+
+                if (data.messages) {
+                    data.messages.forEach(message => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.classList.add('d-flex', 'mb-3');
+                        messageDiv.innerHTML = `
+                            <div class="me-auto p-2 ${message.sender === 'You' ? 'bg-light' : 'bg-primary text-white'} rounded">
+                                <strong>${message.sender}:</strong>
+                                <p>${message.content}</p>
+                            </div>`;
+                        chatBody.appendChild(messageDiv);
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching messages:', error));
+    }
+
+    // Sending a message using Socket.IO
+    document.getElementById("sendMessageBtn").addEventListener("click", async () => {
+        const message = document.getElementById("messageInput").value;
+        if (!activeUserId || !message.trim()) return;
+
+        // Emit the message via Socket.IO
+        sio.emit("send_message", {
+            target_sid: activeUserId,
+            message: message.trim(),
+        });
+
+        // Append sent message to the chat
+        const chatBody = document.getElementById("chatBody");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("d-flex", "mb-3");
+        messageDiv.innerHTML = `
+            <div class="me-auto p-2 bg-light rounded">
+                <strong>You:</strong>
+                <p>${message}</p>
+            </div>`;
+        chatBody.appendChild(messageDiv);
+
+        // Clear input field
+        document.getElementById("messageInput").value = '';
+    });
+
+    // Listen for incoming messages
+    sio.on("message", (data) => {
+        const chatBody = document.getElementById("chatBody");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("d-flex", "mb-3");
+        messageDiv.innerHTML = `
+            <div class="me-auto p-2 bg-primary text-white rounded">
+                <strong>${data.sender}:</strong>
+                <p>${data.message}</p>
+            </div>`;
+        chatBody.appendChild(messageDiv);
+    });
+</script>
+{% endblock %}

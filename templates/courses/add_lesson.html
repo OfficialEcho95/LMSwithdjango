@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add Lesson to {{ course.title }}</h2>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="title" class="form-label">Lesson Title:</label>
+        <input type="text" id="title" name="title" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+        <label for="content" class="form-label">Lesson Content:</label>
+        <textarea id="content" name="content" class="form-control" rows="5" required></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="video_url" class="form-label">Video URLs (Optional):</label>
+        <div id="video_urls">
+            <input type="url" id="video_url" name="video_url" class="form-control" placeholder="Enter video URL">
+        </div>
+        <button type="button" class="btn btn-secondary" id="add_video">Add Video URL</button>
+    </div>
+
+    <div class="form-group">
+        <label for="media_file" class="form-label">Upload Media Files (Optional):</label>
+        <div id="media_files">
+            <input type="file" id="media_file" name="media_file" class="form-control">
+        </div>
+        <button type="button" class="btn btn-secondary" id="add_media">Add Media File</button>
+    </div>
+
+    <div class="form-group">
+        <label for="instructors">Instructors:</label>
+        <select id="instructors" name="instructors[]" class="form-control" multiple required>
+            {% for instructor in instructors %}
+            <option value="{{ instructor.id }}">{{ instructor.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Add Lesson</button>
+        <a href="{% url 'course_detail' course.id %}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+<script>
+    document.getElementById("add_video").addEventListener("click", function () {
+        let videoUrlsDiv = document.getElementById("video_urls");
+        let newVideoInput = document.createElement("input");
+        newVideoInput.type = "url";
+        newVideoInput.name = "video_url";
+        newVideoInput.classList.add("form-control");
+        newVideoInput.placeholder = "Enter additional video URL";
+        videoUrlsDiv.appendChild(newVideoInput);
+    });
+
+    document.getElementById("add_media").addEventListener("click", function () {
+        let mediaFilesDiv = document.getElementById("media_files");
+        let newMediaInput = document.createElement("input");
+        newMediaInput.type = "file";
+        newMediaInput.name = "media_file";
+        newMediaInput.classList.add("form-control");
+        mediaFilesDiv.appendChild(newMediaInput);
+    });
+</script>
+
+{% endblock %}
