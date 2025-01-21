@@ -1,0 +1,5 @@
+migrations
+__pycache__
+settings.py
+paystack.py
+venv
