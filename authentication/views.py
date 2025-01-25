@@ -63,4 +63,4 @@ def register_view(request):
 
 def home_view(request):
     courses = Course.objects.prefetch_related("lessons", "instructor").all()
-    return render(request, "authentication/home.html", {"username": request.user.username, "courses": courses})
+    return render(request, "authentication/index.html", {"username": request.user.username, "courses": courses})
