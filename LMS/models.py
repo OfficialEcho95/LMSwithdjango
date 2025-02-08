@@ -158,6 +158,7 @@ class Lesson(models.Model):
     duration = models.PositiveIntegerField(
         help_text="Duration in minutes", null=True, blank=True
     )
+    is_passed = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -236,7 +237,6 @@ class Question(models.Model):
     def __str__(self):
         return self.question_text
 
-
 # Assignment Model
 class Assignment(models.Model):
     course = models.ForeignKey(
@@ -289,6 +289,10 @@ class AssignmentSubmission(models.Model):
     assignment = models.ForeignKey(
         Assignment, on_delete=models.CASCADE, related_name="submissions"
     )
+    lesson = models.ForeignKey(
+        Lesson, on_delete=models.CASCADE, related_name="submissions",
+        null=True, blank=True
+    )
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="submissions"
     )
@@ -307,23 +311,6 @@ class AssignmentSubmission(models.Model):
 
     def is_graded(self):
         return self.grade is not None
-
-    # def is_passed(self):
-    #     questions = self.assignment.questions.all()
-    #     total_questions = questions.count()
-
-    #     if total_questions == 0:
-    #         return False
-    #     user_answers = Question.is_true
-    #     correct_answers = 0
-    #     for question in questions:
-    #         if question.id in user_answers:
-    #             if user_answers[question.id] == question.is_true: #this scope of question/answer not finalized
-    #                 correct_answers += 1
-
-    #     percentage_correct = (correct_answers / total_questions) * 100
-
-    #     return percentage_correct >= 70
 
     class Meta:
         ordering = ["submitted_at"]

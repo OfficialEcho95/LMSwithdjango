@@ -15,7 +15,8 @@
 
         <div class="assignment-questions">
             <h3 class="questions-title">Questions:</h3>
-            <form method="post" class="question-form">
+            <form method="post" action="{% url 'submit_assignment' course.id lesson.id assignment.id %}"
+                class="question-form">
                 {% csrf_token %}
                 <ol class="question-list">
                     {% for question in assignment.questions.all %}
@@ -33,10 +34,11 @@
                         </p>
                         {% else %}
                         <label>
-                            <input type="radio" name="answer_{{ question.id }}" value="true"> True
+                            <input type="radio" name="answer_{{ question.id }}" value="True" class="answer-option"> True
                         </label>
                         <label>
-                            <input type="radio" name="answer_{{ question.id }}" value="false"> False
+                            <input type="radio" name="answer_{{ question.id }}" value="False" class="answer-option">
+                            False
                         </label>
                         {% endif %}
                     </li>
@@ -44,7 +46,7 @@
                 </ol>
 
                 {% if not is_instructor %}
-                <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn" disabled>Submit Assignment</button>
                 {% endif %}
             </form>
         </div>
@@ -55,4 +57,37 @@
 {% else %}
 <p class="no-assignments-message">No assignments available for this lesson.</p>
 {% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let form = document.querySelector(".question-form");
+        let submitBtn = document.getElementById("submit-btn");
+        let radioGroups = {};
+
+        // Group radio buttons by question ID
+        document.querySelectorAll(".answer-option").forEach(radio => {
+            let name = radio.getAttribute("name");
+            if (!radioGroups[name]) {
+                radioGroups[name] = [];
+            }
+            radioGroups[name].push(radio);
+        });
+
+        function checkAllAnswered() {
+            let allAnswered = Object.values(radioGroups).every(group =>
+                group.some(radio => radio.checked)
+            );
+            submitBtn.disabled = !allAnswered;
+        }
+
+        // Add event listener to each radio button
+        document.querySelectorAll(".answer-option").forEach(radio => {
+            radio.addEventListener("change", checkAllAnswered);
+        });
+
+        // Run the check initially in case the page is prefilled
+        checkAllAnswered();
+    });
+</script>
+
 {% endblock %}

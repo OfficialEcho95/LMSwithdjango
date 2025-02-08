@@ -29,5 +29,3 @@ urlpatterns = [
     path("messages/fetch_messages/", message_list, name='fetch_message'),
     path("messages/send_message/", send_message, name="send_message"),
 ]
-
-

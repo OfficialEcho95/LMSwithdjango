@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="container mt-4">
@@ -25,7 +26,15 @@
         <a href="{% url 'get_lesson' course.id lesson.id %}" class="text-decoration-none text-black">
             <li class="list-group-item mb-3 border rounded shadow-sm">
                 <div>
-                    <strong>{{ lesson.title }} Your score: {{ grade }}</strong><br>
+                    <strong>{{ lesson.title }}</strong><br>
+                    {% with lesson_grades|dict_key:lesson.id as lesson_grade %}
+                    {% if lesson_grade %}
+                    <p>Your latest score: <b>{{ lesson_grade.grade|default:"N/A" }}</b></p>
+                    <p>Assignment: <b>{{ lesson_grade.assignment_title|default:"No Assignment" }}</b></p>
+                    {% else %}
+                    <p>No submissions yet.</p>
+                    {% endif %}
+                    {% endwith %}
                     <p>{{ lesson.content|truncatewords:20 }}</p>
                 </div>
 
@@ -63,6 +72,8 @@
             </li>
         </a>
         {% endfor %}
+    </ul>
+
     </ul>
 </div>
 {% endblock %}

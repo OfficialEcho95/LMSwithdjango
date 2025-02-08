@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from LMS.models import Course, User, Enrollment, UserProgress
+from LMS.models import Course, User, Enrollment, UserProgress, AssignmentSubmission
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponseServerError
 from django.contrib import messages
@@ -408,28 +408,40 @@ def learning(request, course_title, user_email):
     grade = request.GET.get("grade")
     progress = request.GET.get("progress")
 
+    # Dictionary to store lesson-wise grades
+    lesson_grades = {}
+
     for lesson in lessons:
+        submission = AssignmentSubmission.objects.filter(
+            assignment__lesson=lesson, student=request.user
+        ).order_by("-submitted_at").first()
+
+        # Store only the latest grade for the lesson if a submission exists
+        if submission:
+            lesson_grades[lesson.id] = {
+                "assignment_title": submission.assignment.title,
+                "grade": submission.grade,
+            }
+
         local_videos = lesson.media_file.all()
         link_videos = lesson.video_url.all()
 
-        # for debug purpose these 2
         for video in link_videos:
             video.url
         for video in local_videos:
             video.file
 
     instructors = course.instructor.all()
-    for instructor in instructors:
-        instructor.username
+
     context = {
         "user_email": request.user.email,
         "course": course,
         "lessons": lessons,
-        "lesson_id": lesson.id,
-        "instructors": instructor,
+        "lesson_grades": lesson_grades,
+        "lesson_id": lessons[0].id if lessons else None,
+        "instructors": instructors,
         "progress": progress,
-        "grade": grade
+        "grade": grade,
     }
-    print(lesson.id)
 
     return render(request, "courses/learning.html", context)
